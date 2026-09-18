@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* ==========================================================================
+       CHOLTI MART CENTRALIZED THEME VARIABLES (OFFICIAL 5-COLOR SYSTEM)
+       1. Dark Green:     #142C14 (Primary brand, buttons, key headings, footer)
+       2. Cal Poly Green: #2D5128 (Secondary buttons, navigation, supporting areas)
+       3. Fern Green:     #537B2F (Accent CTAs, badges, active states, highlights)
+       4. Asparagus:      #8DA750 (Secondary accents, borders, decorative tags)
+       5. Mindaro:        #E4EB9C (Soft background sections, promo highlights, subtle tints)
+       ========================================================================== */
+    
+    /* 1. Official 5-Color Brand Identity */
+    --primary-color: #142C14;        /* Dark Green */
+    --primary-hover: #0B1B0B;        /* Deep Dark Green Hover */
+    --primary-light: #F3F6EC;        /* Soft Mindaro-infused Surface Tint */
+    
+    --secondary-color: #2D5128;      /* Cal Poly Green */
+    --secondary-hover: #203A1C;      /* Deeper Cal Poly Green */
+
+    --accent-color: #537B2F;         /* Fern Green */
+    --accent-hover: #426325;         /* Deeper Fern Green */
+
+    --supporting-color: #8DA750;     /* Asparagus */
+    --supporting-hover: #7B9443;     /* Deeper Asparagus */
+
+    --light-accent-color: #E4EB9C;   /* Mindaro */
+    --light-accent-hover: #D8E088;   /* Deeper Mindaro */
+
+    /* 2. Surfaces & Backgrounds */
+    --background-color: #F9FAF7;     /* Clean, natural off-white canvas */
+    --surface-color: #FFFFFF;        /* Pure white cards & modals */
+    --header-bg: #FFFFFF;            /* Navigation header background */
+    --footer-bg: #142C14;            /* Dark Green footer background */
+
+    /* 3. Text Colors */
+    --text-primary: #142C14;         /* Dark green-slate high-contrast primary text */
+    --text-secondary: #475569;       /* Slate 600 body text */
+    --text-muted: #94A3B8;           /* Slate 400 */
+    --text-inverse: #FFFFFF;         /* White text on dark elements */
+
+    /* 4. Borders & Lines */
+    --border-color: #E2E8F0;         /* Slate 200 standard border */
+    --border-light: #F1F5F9;         /* Slate 100 divider */
+    --border-accent: #8DA750;        /* Asparagus border */
+
+    /* 5. Button Tokens */
+    --btn-primary-bg: #142C14;
+    --btn-primary-text: #FFFFFF;
+    --btn-primary-hover: #2D5128;
+
+    --btn-secondary-bg: #2D5128;
+    --btn-secondary-text: #FFFFFF;
+    --btn-secondary-hover: #142C14;
+
+    --btn-accent-bg: #537B2F;
+    --btn-accent-text: #FFFFFF;
+    --btn-accent-hover: #426325;
+
+    /* 6. System Status Feedback */
+    --success-color: #537B2F;
+    --warning-color: #D97706;
+    --error-color: #DC2626;
+    --info-color: #2563EB;
+
+    /* 7. Typography System */
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-button: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-nav: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-bangla: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, sans-serif;
+
+    /* 8. Spacing & Geometric Radii */
+    --radius-sm: 0.375rem;           /* 6px */
+    --radius-md: 0.5rem;             /* 8px */
+    --radius-lg: 0.75rem;            /* 12px */
+    --radius-xl: 1rem;               /* 16px */
+    --radius-button: 0.75rem;        /* 12px default for buttons */
+    --radius-card: 1rem;             /* 16px default for cards */
+    --container-max-width: 80rem;    /* 1280px */
+    --section-spacing-y: 4rem;
+  }
+  
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ==========================================================================
+   REUSABLE THEME COMPONENT UTILITY CLASSES
+   ========================================================================== */
+.bg-theme-primary { background-color: var(--primary-color); }
+.hover\:bg-theme-primary-hover:hover { background-color: var(--primary-hover); }
+.text-theme-primary { color: var(--primary-color); }
+.border-theme-primary { border-color: var(--primary-color); }
+
+.bg-theme-secondary { background-color: var(--secondary-color); }
+.hover\:bg-theme-secondary-hover:hover { background-color: var(--secondary-hover); }
+.text-theme-secondary { color: var(--secondary-color); }
+.border-theme-secondary { border-color: var(--secondary-color); }
+
+.bg-theme-accent { background-color: var(--accent-color); }
+.hover\:bg-theme-accent-hover:hover { background-color: var(--accent-hover); }
+.text-theme-accent { color: var(--accent-color); }
+.border-theme-accent { border-color: var(--accent-color); }
+
+.bg-theme-supporting { background-color: var(--supporting-color); }
+.text-theme-supporting { color: var(--supporting-color); }
+.border-theme-supporting { border-color: var(--supporting-color); }
+
+.bg-theme-light-accent { background-color: var(--light-accent-color); }
+.text-theme-light-accent { color: var(--primary-color); }
+.border-theme-light-accent { border-color: var(--light-accent-color); }
+
+.bg-theme-surface { background-color: var(--surface-color); }
+.text-theme-main { color: var(--text-primary); }
+.text-theme-sub { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border-color); }
+.border-theme-light { border-color: var(--border-light); }
+
+.rounded-theme-btn { border-radius: var(--radius-button); }
+.rounded-theme-card { border-radius: var(--radius-card); }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

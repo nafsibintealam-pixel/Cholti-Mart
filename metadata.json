@@ -1,0 +1,6 @@
+{
+  "name": "Cholti Mart",
+  "description": "Modern, scalable e-commerce website for Cholti Mart Bangladesh — Shop Smart, Shop Cholti Mart.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
