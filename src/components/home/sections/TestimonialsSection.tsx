@@ -1,8 +1,10 @@
 import React from 'react';
 import { Star, CheckCircle2 } from 'lucide-react';
-import { TESTIMONIALS_DATA } from '../../../data/siteContent';
+import { contentService } from '../../../services';
 
 export const TestimonialsSection: React.FC = () => {
+  const testimonials = contentService.getTestimonialsSync();
+
   return (
     <section className="py-12 sm:py-16 bg-neutral-50/50 border-b border-neutral-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +22,7 @@ export const TestimonialsSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS_DATA.map(item => (
+          {testimonials.map(item => (
             <div
               key={item.id}
               className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-2xs flex flex-col justify-between"
@@ -34,16 +36,16 @@ export const TestimonialsSection: React.FC = () => {
                 </div>
 
                 <p className="text-xs sm:text-sm text-neutral-600 italic leading-relaxed">
-                  {item.comment}
+                  "{item.comment}"
                 </p>
               </div>
 
               <div className="mt-5 pt-4 border-t border-neutral-100 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-neutral-900 block">{item.name}</span>
-                  <span className="text-[11px] text-neutral-400 block">{item.role}</span>
+                  <span className="text-xs font-bold text-neutral-900 block">{item.customerName}</span>
+                  <span className="text-[11px] text-neutral-400 block">{item.customerLocation}</span>
                 </div>
-                {item.verified && (
+                {item.isVerified && (
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     <CheckCircle2 className="w-3 h-3" />
                     <span>Verified Order</span>

@@ -1,8 +1,9 @@
 import React from 'react';
 import { ShieldCheck, Truck, RefreshCw, Headphones } from 'lucide-react';
-import { TRUST_ITEMS } from '../../../data/siteContent';
+import { contentService } from '../../../services';
 
 export const TrustSection: React.FC = () => {
+  const trustItems = contentService.getTrustItemsSync();
   const getIcon = (name: string) => {
     switch (name) {
       case 'ShieldCheck':
@@ -34,7 +35,7 @@ export const TrustSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {TRUST_ITEMS.map(item => (
+          {trustItems.map(item => (
             <div
               key={item.id}
               className="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200/80 shadow-2xs hover:shadow-sm transition-all"

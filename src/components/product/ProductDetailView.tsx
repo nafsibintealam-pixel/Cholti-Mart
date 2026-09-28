@@ -13,6 +13,7 @@ import {
   Info
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
+import { reviewService } from '../../services';
 import { ProductCard } from './ProductCard';
 
 export const ProductDetailView: React.FC = () => {
@@ -69,6 +70,19 @@ export const ProductDetailView: React.FC = () => {
         verifiedPurchase: false
       };
       setReviewsList(prev => [newReview, ...prev]);
+      
+      // Persist to central ReviewService
+      reviewService.createReview({
+        productId: product.id,
+        productName: product.name,
+        customerName: reviewName.trim(),
+        customerEmail: 'shopper@choltimart.com',
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+        isApproved: true,
+        isVerifiedPurchase: false
+      }).catch(console.warn);
+
       setReviewName('');
       setReviewComment('');
       showToast('Thank you! Your product review has been submitted.', 'success');

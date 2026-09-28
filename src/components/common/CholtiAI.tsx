@@ -15,7 +15,6 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
-import { DEMO_PRODUCTS } from '../../data/products';
 import { Product } from '../../types';
 
 interface Message {
@@ -41,7 +40,7 @@ const PRESET_PROMPTS = [
 ];
 
 export const CholtiAI: React.FC = () => {
-  const { navigateTo, addToCart, setQuickViewProduct, formatCurrency, t, language } = useShop();
+  const { products, navigateTo, addToCart, setQuickViewProduct, formatCurrency, t, language } = useShop();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [inputQuery, setInputQuery] = useState('');
@@ -95,28 +94,28 @@ export const CholtiAI: React.FC = () => {
         replyText = language === 'bn'
           ? 'এখানে ১,০০০ টাকার নিচের কয়েকটি অত্যন্ত জনপ্রিয় ও দরকারী উপহার সামগ্রী রয়েছে:'
           : 'Here are our most popular gifts and lifestyle items under ৳1,000 with nationwide Cash on Delivery:';
-        recommended = DEMO_PRODUCTS.filter(p => p.price <= 1000).slice(0, 3);
+        recommended = products.filter(p => p.price <= 1000).slice(0, 3);
         action = { label: 'Explore More Budget Finds', view: 'shop' };
 
       } else if (lower.includes('trend') || lower.includes('best seller') || lower.includes('popular')) {
         replyText = language === 'bn'
           ? 'এই মুহূর্তে আমাদের ক্যাটালগের শীর্ষ ট্রেন্ডিং পণ্যগুলি দেখতে পারেন:'
           : 'Here are our top trending products that customers in Bangladesh are loving right now:';
-        recommended = DEMO_PRODUCTS.filter(p => p.isTrending || p.badge === 'Best Seller').slice(0, 3);
+        recommended = products.filter(p => p.isTrending || p.badge === 'Best Seller').slice(0, 3);
         action = { label: 'View All Trending Deals', view: 'shop' };
 
       } else if (lower.includes('gadget') || lower.includes('tech') || lower.includes('charger') || lower.includes('audio') || lower.includes('neckband')) {
         replyText = language === 'bn'
           ? 'আমাদের স্মার্ট গ্যাজেট ক্যাটাগরি থেকে সেরা কিছু কালেকশন:'
           : 'Check out these top-rated smart gadgets and everyday tech essentials:';
-        recommended = DEMO_PRODUCTS.filter(p => p.category === 'Gadgets').slice(0, 3);
+        recommended = products.filter(p => p.category === 'Gadgets').slice(0, 3);
         action = { label: 'Shop All Smart Gadgets', view: 'shop', category: 'Gadgets' };
 
       } else if (lower.includes('beauty') || lower.includes('skin') || lower.includes('serum') || lower.includes('hair') || lower.includes('cosmetic')) {
         replyText = language === 'bn'
           ? 'বিউটি ও পার্সোনাল কেয়ারের কিছু প্রিয় পণ্য:'
           : 'Here are authentic, dermatologically-tested beauty and personal care favourites:';
-        recommended = DEMO_PRODUCTS.filter(p => p.category === 'Beauty & Personal Care').slice(0, 3);
+        recommended = products.filter(p => p.category === 'Beauty & Personal Care').slice(0, 3);
         action = { label: 'Explore Beauty & Personal Care', view: 'shop', category: 'Beauty & Personal Care' };
 
       } else if (lower.includes('delivery') || lower.includes('shipping') || lower.includes('charge') || lower.includes('cod') || lower.includes('cash on delivery')) {
@@ -139,7 +138,7 @@ export const CholtiAI: React.FC = () => {
 
       } else {
         // Keyword search in product catalog
-        const matches = DEMO_PRODUCTS.filter(p => 
+        const matches = products.filter(p => 
           p.name.toLowerCase().includes(lower) || 
           p.category.toLowerCase().includes(lower) ||
           p.tags.some(t => t.toLowerCase().includes(lower))

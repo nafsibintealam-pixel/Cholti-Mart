@@ -16,13 +16,14 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
-import { FAQS_DATA } from '../../data/faqs';
+import { contentService } from '../../services';
 import { AppView } from '../../types';
 
 export const LegalView: React.FC = () => {
   const { currentView, navigateTo } = useShop();
   const [openFaqId, setOpenFaqId] = useState<string>('faq-1');
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const faqs = contentService.getFaqsSync();
 
   const legalTabs: { id: AppView; label: string }[] = [
     { id: 'about', label: 'About Us' },
@@ -165,7 +166,7 @@ export const LegalView: React.FC = () => {
             </div>
 
             <div className="space-y-3 pt-2">
-              {FAQS_DATA.map(faq => (
+              {faqs.map(faq => (
                 <div
                   key={faq.id}
                   className="bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all"

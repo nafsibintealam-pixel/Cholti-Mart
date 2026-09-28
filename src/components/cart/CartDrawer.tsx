@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag, Truck } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
+import { FREE_DELIVERY_THRESHOLD } from '../../services';
 
 export const CartDrawer: React.FC = () => {
   const { 
@@ -46,9 +47,9 @@ export const CartDrawer: React.FC = () => {
           </button>
         </div>
 
-        {/* Free Shipping Progress Indicator (BD ৳2,500 threshold) */}
+        {/* Free Shipping Progress Indicator */}
         <div className="bg-emerald-50/80 px-4 py-2.5 border-b border-emerald-100/60 text-xs">
-          {cartSubtotal >= 2500 ? (
+          {cartSubtotal >= FREE_DELIVERY_THRESHOLD ? (
             <div className="flex items-center gap-2 text-emerald-800 font-semibold">
               <Truck className="w-4 h-4 text-emerald-600" />
               <span>Congratulations! You qualify for Free Delivery across Bangladesh!</span>
@@ -56,13 +57,13 @@ export const CartDrawer: React.FC = () => {
           ) : (
             <div>
               <div className="flex items-center justify-between text-neutral-700 mb-1">
-                <span>Add <strong>৳{(2500 - cartSubtotal).toLocaleString()}</strong> more for Free Delivery</span>
-                <span className="font-bold text-emerald-700">{Math.round((cartSubtotal / 2500) * 100)}%</span>
+                <span>Add <strong>৳{(FREE_DELIVERY_THRESHOLD - cartSubtotal).toLocaleString()}</strong> more for Free Delivery</span>
+                <span className="font-bold text-emerald-700">{Math.round((cartSubtotal / FREE_DELIVERY_THRESHOLD) * 100)}%</span>
               </div>
               <div className="w-full h-1.5 bg-neutral-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-emerald-600 rounded-full transition-all duration-300"
-                  style={{ width: `${Math.min(100, (cartSubtotal / 2500) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (cartSubtotal / FREE_DELIVERY_THRESHOLD) * 100)}%` }}
                 />
               </div>
             </div>

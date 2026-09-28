@@ -1,10 +1,11 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useShop } from '../../../context/ShopContext';
-import { CATEGORIES_DATA } from '../../../data/categories';
+import { categoryService } from '../../../services';
 
 export const CategorySection: React.FC = () => {
   const { navigateTo } = useShop();
+  const categories = categoryService.getCategoriesSync();
 
   return (
     <section id="shop-by-category" className="py-12 sm:py-16 bg-white border-b border-neutral-200/60">
@@ -34,7 +35,7 @@ export const CategorySection: React.FC = () => {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          {CATEGORIES_DATA.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => navigateTo('shop', cat.name)}

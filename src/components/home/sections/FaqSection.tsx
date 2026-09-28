@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle, ArrowRight } from 'lucide-react';
-import { FAQS_DATA } from '../../../data/faqs';
+import { contentService } from '../../../services';
 import { useShop } from '../../../context/ShopContext';
 
 export const FaqSection: React.FC = () => {
   const { navigateTo } = useShop();
-  const [openFaqId, setOpenFaqId] = useState<string>('faq-1');
+  const faqs = contentService.getFaqsSync();
+  const [openFaqId, setOpenFaqId] = useState<string>(faqs[0]?.id || 'faq-1');
 
   // Display first 5 FAQs on homepage
-  const displayFaqs = FAQS_DATA.slice(0, 5);
+  const displayFaqs = faqs.slice(0, 5);
 
   return (
     <section className="py-12 sm:py-16 bg-white border-b border-neutral-200/60">

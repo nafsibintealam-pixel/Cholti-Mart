@@ -12,6 +12,7 @@ import {
   FooterConfig 
 } from '../data/masterConfig';
 import { CategoryItem, Product } from '../types';
+import { contentService, siteDesignService } from '../services';
 
 interface CustomizerContextType {
   config: MasterStoreConfig;
@@ -156,6 +157,7 @@ export const CustomizerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateHero = (hero: Partial<HeroConfig>) => {
+    contentService.updateHeroConfig(hero).catch(console.warn);
     setConfig(prev => ({
       ...prev,
       lastUpdated: new Date().toISOString(),
@@ -164,6 +166,7 @@ export const CustomizerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updatePromoBanner = (banner: Partial<PromoBannerConfig>) => {
+    contentService.updatePromoBanner(banner).catch(console.warn);
     setConfig(prev => ({
       ...prev,
       lastUpdated: new Date().toISOString(),
@@ -172,6 +175,7 @@ export const CustomizerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateSocialLinks = (links: Partial<SocialLinksConfig>) => {
+    siteDesignService.updateSocialLinks(links).catch(console.warn);
     setConfig(prev => ({
       ...prev,
       lastUpdated: new Date().toISOString(),
@@ -180,6 +184,7 @@ export const CustomizerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateFooter = (footer: Partial<FooterConfig>) => {
+    siteDesignService.updateFooter(footer).catch(console.warn);
     setConfig(prev => ({
       ...prev,
       lastUpdated: new Date().toISOString(),

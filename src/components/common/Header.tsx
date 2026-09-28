@@ -16,7 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
-import { CATEGORIES_DATA } from '../../data/categories';
+import { categoryService, siteDesignService } from '../../services';
 import { CholtiMartLogo } from './CholtiMartLogo';
 
 export const Header: React.FC = () => {
@@ -42,6 +42,9 @@ export const Header: React.FC = () => {
   const [isCategoryHovered, setIsCategoryHovered] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  const categories = categoryService.getCategoriesSync();
+  const designConfig = siteDesignService.getDesignConfigSync();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,11 +101,11 @@ export const Header: React.FC = () => {
           {/* Right: Support & Language */}
           <div className="flex items-center space-x-4">
             <a 
-              href="tel:+8801700000000" 
+              href={`tel:${designConfig.contactInfo.phone.replace(/[^0-9+]/g, '')}`} 
               className="hidden md:inline-flex items-center gap-1.5 hover:text-white transition-colors text-neutral-300"
             >
               <Phone className="w-3 h-3 text-[#8DA750]" />
-              <span>+880 1700-000000</span>
+              <span>{designConfig.contactInfo.phone}</span>
             </a>
 
             {/* Language Switcher */}
@@ -321,7 +324,7 @@ export const Header: React.FC = () => {
                 {/* Dropdown Menu */}
                 {isCategoryHovered && (
                   <div className="absolute top-full -left-12 w-[640px] bg-white rounded-2xl shadow-2xl border border-neutral-200 p-6 grid grid-cols-2 gap-4 z-50 animate-in fade-in duration-150">
-                    {CATEGORIES_DATA.slice(0, 8).map(cat => (
+                    {categories.slice(0, 8).map(cat => (
                       <button
                         key={cat.id}
                         onClick={() => {
@@ -498,7 +501,7 @@ export const Header: React.FC = () => {
               <div className="pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-neutral-400 px-3">
                 {t('nav_categories', 'Categories')}
               </div>
-              {CATEGORIES_DATA.map(cat => (
+              {categories.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => { navigateTo('shop', cat.name); setIsMobileMenuOpen(false); }}

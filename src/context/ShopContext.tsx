@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, Order, AppView } from '../types';
-import { DEMO_PRODUCTS } from '../data/products';
 import { TRANSLATIONS, formatPrice, toBengaliNumber } from '../data/translations';
+import { productService, orderService, couponService, deliveryService } from '../services';
 
 interface ToastState {
   id: number;
@@ -78,84 +78,24 @@ interface ShopContextType {
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
-const INITIAL_ORDERS: Order[] = [
-  {
-    id: 'CM-84920',
-    date: '17 Sep 2026',
-    customerName: 'Tanvir Ahmed',
-    phone: '01712345678',
-    email: 'tanvir@example.com',
-    district: 'Dhaka',
-    area: 'Dhanmondi',
-    address: 'House 34, Road 11A, Dhanmondi, Dhaka-1209',
-    notes: 'Please call before delivery',
-    paymentMethod: 'Cash on Delivery',
-    items: [
-      {
-        productId: 'cm-106',
-        productName: 'Adjustable Aluminum Laptop Stand',
-        price: 1450,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80',
-        variant: 'Space Gray'
-      },
-      {
-        productId: 'cm-110',
-        productName: 'Foldable Desktop Phone Holder',
-        price: 450,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=400&auto=format&fit=crop&q=80',
-        variant: 'Pure Black'
-      }
-    ],
-    subtotal: 1900,
-    shippingFee: 70,
-    discount: 190,
-    total: 1780,
-    status: 'Processing',
-    courierTrackingCode: 'ST-9481203',
-    courierPartner: 'Steadfast Courier'
-  },
-  {
-    id: 'CM-10294',
-    date: '02 Sep 2026',
-    customerName: 'Farhana Kabir',
-    phone: '01898765432',
-    email: 'farhana@example.com',
-    district: 'Chittagong',
-    area: 'Panchlaish',
-    address: 'GEC Circle, Nasirabad Housing, Chittagong',
-    paymentMethod: 'bKash',
-    items: [
-      {
-        productId: 'cm-102',
-        productName: "Premium Women's Crossbody Bag",
-        price: 2150,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&auto=format&fit=crop&q=80',
-        variant: 'Caramel Brown'
-      }
-    ],
-    subtotal: 2150,
-    shippingFee: 130,
-    discount: 0,
-    total: 2280,
-    status: 'Delivered',
-    courierTrackingCode: 'PT-3329104',
-    courierPartner: 'Pathao Courier'
-  }
-];
-
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products] = useState<Product[]>(DEMO_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(() => productService.getProductsSync());
+
+  // Listen to authoritative catalog updates from the service layer
+  useEffect(() => {
+    return productService.subscribe(() => {
+      setProducts(productService.getProductsSync());
+    });
+  }, []);
   
   // Cart state initialized from localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('cholti_cart');
+      const seedProducts = productService.getProductsSync();
       return saved ? JSON.parse(saved) : [
         {
-          product: DEMO_PRODUCTS[5], // Laptop stand
+          product: seedProducts[5] || seedProducts[0], // Laptop stand
           quantity: 1,
           selectedColor: 'Space Gray'
         }
@@ -251,15 +191,15 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
 
-  // Orders
-  const [orders, setOrders] = useState<Order[]>(() => {
-    try {
-      const saved = localStorage.getItem('cholti_orders');
-      return saved ? JSON.parse(saved) : INITIAL_ORDERS;
-    } catch {
-      return INITIAL_ORDERS;
-    }
-  });
+  // Orders from authoritative OrderService
+  const [orders, setOrders] = useState<Order[]>(() => orderService.getOrdersSync());
+
+  // Listen to authoritative orders updates
+  useEffect(() => {
+    return orderService.subscribe(() => {
+      setOrders(orderService.getOrdersSync());
+    });
+  }, []);
 
   // Coupon
   const [appliedCoupon, setAppliedCoupon] = useState<CouponState | null>({
@@ -419,16 +359,23 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyCoupon = (code: string) => {
     const clean = code.trim().toUpperCase();
-    if (clean === 'CHOLTI10') {
-      setAppliedCoupon({ code: 'CHOLTI10', discountType: 'percentage', value: 10 });
-      showToast('Coupon "CHOLTI10" applied: 10% discount added!', 'success');
-      return true;
-    } else if (clean === 'FIRST100') {
-      setAppliedCoupon({ code: 'FIRST100', discountType: 'fixed', value: 100 });
-      showToast('Coupon "FIRST100" applied: ৳100 discount added!', 'success');
+    const coupons = couponService.getCouponsSync();
+    const found = coupons.find(c => c.code.toUpperCase() === clean && c.status === 'active');
+    if (found) {
+      if (found.minSpend && cartSubtotal < found.minSpend) {
+        showToast(`Minimum order total of ৳${found.minSpend} required for "${found.code}"`, 'error');
+        return false;
+      }
+      const discountVal = found.discountValue ?? found.value ?? 0;
+      setAppliedCoupon({
+        code: found.code,
+        discountType: found.discountType,
+        value: discountVal
+      });
+      showToast(`Coupon "${found.code}" applied: ${found.discountType === 'percentage' ? `${discountVal}%` : `৳${discountVal}`} discount added!`, 'success');
       return true;
     } else {
-      showToast('Invalid promo code. Try "CHOLTI10" or "FIRST100"', 'error');
+      showToast('Invalid promo code. Try "CHOLTI10" or "EID200"', 'error');
       return false;
     }
   };
@@ -441,9 +388,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const cartSubtotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   
-  // Delivery rules for Bangladesh:
-  // Standard inside Dhaka ৳70, free if subtotal >= 2500
-  const estimatedDeliveryFee = cartSubtotal >= 2500 || cartSubtotal === 0 ? 0 : 70;
+  // Delivery rules for Bangladesh using DeliveryService
+  const estimatedDeliveryFee = deliveryService.calculateDeliveryFee('Dhaka', cartSubtotal);
   
   const discountAmount = appliedCoupon 
     ? appliedCoupon.discountType === 'percentage' 
@@ -456,18 +402,73 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const placeOrder = (orderData: Omit<Order, 'id' | 'date' | 'status' | 'courierTrackingCode' | 'courierPartner'>) => {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const newOrderId = `CM-${randomNum}`;
+    const trackingCode = `ST-${Math.floor(1000000 + Math.random() * 9000000)}`;
+    const nowISO = new Date().toISOString();
+    const nowStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const formattedTimestamp = new Date().toLocaleString('en-GB', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+
+    const isCOD = orderData.paymentMethod === 'Cash on Delivery';
+
     const newOrder: Order = {
       ...orderData,
       id: newOrderId,
-      date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      status: 'Order Received',
-      courierTrackingCode: `ST-${Math.floor(1000000 + Math.random() * 9000000)}`,
-      courierPartner: 'Steadfast Courier'
+      date: nowStr,
+      createdAt: nowISO,
+      updatedAt: nowISO,
+      status: 'Pending',
+      paymentStatus: isCOD ? 'unpaid' : 'paid',
+      deliveryStatus: 'pending',
+      courierTrackingCode: trackingCode,
+      trackingNumber: trackingCode,
+      courierPartner: 'Steadfast Courier',
+      courier: 'Steadfast Courier',
+      deliveryCharge: orderData.shippingFee || estimatedDeliveryFee,
+      itemCount: orderData.items.reduce((acc, it) => acc + it.quantity, 0),
+      billingAddress: orderData.billingAddress || {
+        fullName: orderData.customerName,
+        phone: orderData.phone,
+        email: orderData.email,
+        street: orderData.address,
+        area: orderData.area,
+        district: orderData.district,
+        postalCode: '1200',
+        country: 'Bangladesh'
+      },
+      shippingAddress: orderData.shippingAddress || {
+        fullName: orderData.customerName,
+        phone: orderData.phone,
+        email: orderData.email,
+        street: orderData.address,
+        area: orderData.area,
+        district: orderData.district,
+        postalCode: '1200',
+        country: 'Bangladesh'
+      },
+      adminNotes: [],
+      timeline: [
+        {
+          id: `tl-${Date.now()}-created`,
+          timestamp: formattedTimestamp,
+          title: 'Order Placed',
+          description: `Order created via web store checkout (${orderData.paymentMethod}).`,
+          type: 'created',
+          user: 'Customer (Online Checkout)'
+        }
+      ]
     };
 
-    setOrders(prev => [newOrder, ...prev]);
+    // Authoritatively save via OrderService
+    const saved = orderService.createOrderSync(newOrder);
+    setOrders(orderService.getOrdersSync());
     clearCart();
-    return newOrder;
+    return saved;
   };
 
   const trackOrderLookup = (orderId: string, phoneOrEmail?: string) => {

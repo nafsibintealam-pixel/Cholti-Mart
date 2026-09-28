@@ -10,7 +10,9 @@ import {
   Server, 
   AlertCircle,
   CheckCircle2,
-  Layers
+  Layers,
+  Info,
+  Sparkles
 } from 'lucide-react';
 import { useAdminAuth, ROLE_DEFINITIONS } from '../../context/AdminAuthContext';
 import { AdminRole } from '../../types';
@@ -18,17 +20,23 @@ import { useShop } from '../../context/ShopContext';
 import { useCustomizer } from '../../context/CustomizerContext';
 
 export const AdminLoginView: React.FC = () => {
-  const { login, backendConfig } = useAdminAuth();
+  const { login, backendConfig, isProductionBackendConnected, authMode } = useAdminAuth();
   const { navigateTo } = useShop();
   const { config } = useCustomizer();
 
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('••••••••');
+  const [username, setUsername] = useState('superadmin');
+  const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<AdminRole>('SUPER_ADMIN');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleQuickFillDevCredentials = () => {
+    setUsername('superadmin');
+    setPassword('demo@Cholti2026!');
+    setSelectedRole('SUPER_ADMIN');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +46,7 @@ export const AdminLoginView: React.FC = () => {
     try {
       const result = await login({
         usernameOrEmail: username,
-        password: password === '••••••••' ? 'cholti_admin_secure_pass' : password,
+        password: password,
         selectedRole
       });
 
@@ -59,7 +67,7 @@ export const AdminLoginView: React.FC = () => {
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#2D5128]/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-1/4 w-80 h-80 bg-[#537B2F]/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10 space-y-6">
+      <div className="w-full max-w-md relative z-10 space-y-5">
         
         {/* Brand & Administrative Header */}
         <div className="text-center space-y-2">
@@ -75,14 +83,28 @@ export const AdminLoginView: React.FC = () => {
           </p>
         </div>
 
-        {/* Security / Protected Area Notice */}
-        <div className="bg-[#142C14]/90 border border-[#8DA750]/30 rounded-2xl p-3.5 text-xs text-neutral-300 flex items-start gap-3 backdrop-blur-md shadow-sm">
-          <Lock className="w-4 h-4 text-[#E4EB9C] shrink-0 mt-0.5" />
+        {/* Development Preview Mode Banner - Transparently separating mock from production */}
+        <div className="bg-amber-950/40 border border-amber-500/30 rounded-2xl p-3.5 text-xs text-amber-200/90 flex items-start gap-3 backdrop-blur-md shadow-sm">
+          <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold text-white block">Restricted Administrator Access</span>
-            <p className="text-[11px] text-neutral-300 leading-relaxed">
-              This area is strictly reserved for authorized store administrators, managers, and fulfillment officers. Unauthenticated visitors are blocked.
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-amber-300 block">Development Preview Environment</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-semibold">
+                Mock Driver
+              </span>
+            </div>
+            <p className="text-[11px] text-amber-200/80 leading-relaxed">
+              This preview uses an in-browser mock authentication service for prototyping. 
+              Zero plaintext production passwords exist in frontend code.
             </p>
+            <button
+              type="button"
+              onClick={handleQuickFillDevCredentials}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E4EB9C] hover:underline pt-1 cursor-pointer"
+            >
+              <Sparkles className="w-3 h-3 text-[#E4EB9C]" />
+              <span>Click to auto-fill preview credentials for RBAC simulation</span>
+            </button>
           </div>
         </div>
 
@@ -102,7 +124,7 @@ export const AdminLoginView: React.FC = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-neutral-300 flex items-center justify-between">
                 <span>Username or Email</span>
-                <span className="text-[10px] text-neutral-500 font-normal">WordPress User</span>
+                <span className="text-[10px] text-neutral-500 font-normal">Administrator ID</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
@@ -113,7 +135,7 @@ export const AdminLoginView: React.FC = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  placeholder="admin or email@choltimart.com"
+                  placeholder="superadmin or admin@choltimart.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-neutral-950/80 border border-neutral-700 rounded-xl text-white text-sm focus:outline-none focus:border-[#8DA750] focus:ring-1 focus:ring-[#8DA750] transition-colors"
                 />
               </div>
@@ -123,7 +145,7 @@ export const AdminLoginView: React.FC = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-neutral-300 flex items-center justify-between">
                 <span>Password</span>
-                <span className="text-[10px] text-neutral-500 font-normal">Encrypted</span>
+                <span className="text-[10px] text-neutral-500 font-normal">Encrypted in Transit</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
@@ -140,7 +162,7 @@ export const AdminLoginView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -192,7 +214,7 @@ export const AdminLoginView: React.FC = () => {
               className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#2D5128] to-[#142C14] hover:from-[#537B2F] hover:to-[#2D5128] text-white font-bold text-sm border border-[#8DA750]/50 shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
-                <span>Verifying Administrator Token...</span>
+                <span>Authenticating Administrator...</span>
               ) : (
                 <>
                   <Lock className="w-4 h-4 text-[#E4EB9C]" />
@@ -207,10 +229,10 @@ export const AdminLoginView: React.FC = () => {
           <div className="pt-3 border-t border-neutral-800 space-y-2">
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#E4EB9C]">
               <Server className="w-3.5 h-3.5" />
-              <span>WordPress / WooCommerce Production Backend Architecture</span>
+              <span>Production Backend Interface Ready</span>
             </div>
             <p className="text-[10px] text-neutral-400 leading-relaxed">
-              In production, this interface authenticates directly with WordPress REST API at <code className="text-neutral-300 font-mono">{backendConfig.wpApiEndpoint}</code> using secure JWT authentication or WooCommerce REST API keys. No secrets or passwords exist in frontend code.
+              When moving to production, connect to WordPress JWT or WooCommerce REST authentication at <code className="text-neutral-300 font-mono">{backendConfig.wpApiEndpoint}</code>. Authentication will not be considered production-secure until this real backend authentication system is connected over HTTPS.
             </p>
           </div>
 
@@ -231,3 +253,4 @@ export const AdminLoginView: React.FC = () => {
     </div>
   );
 };
+

@@ -11,6 +11,7 @@ import {
   Coins
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
+import { deliveryService } from '../../services';
 import { Order } from '../../types';
 
 const BD_DISTRICTS = [
@@ -45,7 +46,7 @@ export const CheckoutView: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
 
-  const deliveryCharge = cartSubtotal >= 2500 ? 0 : (formData.district === 'Dhaka' ? 70 : 130);
+  const deliveryCharge = deliveryService.calculateDeliveryFee(formData.district, cartSubtotal);
   const finalPayable = Math.max(0, cartSubtotal - discountAmount + (cart.length > 0 ? deliveryCharge : 0));
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

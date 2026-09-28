@@ -10,10 +10,12 @@ import {
   CreditCard 
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
+import { siteDesignService } from '../../services';
 import { CholtiMartLogo } from './CholtiMartLogo';
 
 export const Footer: React.FC = () => {
   const { navigateTo } = useShop();
+  const designConfig = siteDesignService.getDesignConfigSync();
 
   return (
     <footer className="bg-neutral-900 text-white pt-12 sm:pt-16 pb-24 lg:pb-12 border-t border-neutral-800">
@@ -34,24 +36,24 @@ export const Footer: React.FC = () => {
             <div className="space-y-2 pt-2 text-xs text-neutral-400">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>House 42, Road 7, Sector 3, Uttara, Dhaka-1230, Bangladesh</span>
+                <span>{designConfig.contactInfo.address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
-                <a href="tel:+8801700000000" className="hover:text-white transition-colors font-medium">
-                  +880 1700-000000 (10 AM - 10 PM)
+                <a href={`tel:${designConfig.contactInfo.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-white transition-colors font-medium">
+                  {designConfig.contactInfo.phone} ({designConfig.contactInfo.helplineHours})
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-500 shrink-0" />
-                <a href="mailto:support@choltimart.com" className="hover:text-white transition-colors">
-                  support@choltimart.com
+                <a href={`mailto:${designConfig.contactInfo.email}`} className="hover:text-white transition-colors">
+                  {designConfig.contactInfo.email}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                 <a 
-                  href="https://wa.me/8801700000000" 
+                  href={`https://wa.me/${designConfig.contactInfo.whatsapp.replace(/[^0-9]/g, '')}`} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="hover:text-white transition-colors"
@@ -177,7 +179,7 @@ export const Footer: React.FC = () => {
               <span className="text-xs text-neutral-400 block mb-2 font-medium">Follow Cholti Mart</span>
               <div className="flex items-center space-x-2.5">
                 <a 
-                  href="https://facebook.com" 
+                  href={designConfig.socialLinks.facebook || 'https://facebook.com'} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-8 h-8 rounded-lg bg-neutral-800 hover:bg-emerald-600 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
@@ -186,7 +188,7 @@ export const Footer: React.FC = () => {
                   fb
                 </a>
                 <a 
-                  href="https://instagram.com" 
+                  href={designConfig.socialLinks.instagram || 'https://instagram.com'} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-8 h-8 rounded-lg bg-neutral-800 hover:bg-emerald-600 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
@@ -195,7 +197,7 @@ export const Footer: React.FC = () => {
                   ig
                 </a>
                 <a 
-                  href="https://tiktok.com" 
+                  href={designConfig.socialLinks.tiktok || 'https://tiktok.com'} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-8 h-8 rounded-lg bg-neutral-800 hover:bg-emerald-600 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
@@ -204,7 +206,7 @@ export const Footer: React.FC = () => {
                   tk
                 </a>
                 <a 
-                  href="https://wa.me/8801700000000" 
+                  href={`https://wa.me/${designConfig.contactInfo.whatsapp.replace(/[^0-9]/g, '')}`} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-8 h-8 rounded-lg bg-neutral-800 hover:bg-emerald-600 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"

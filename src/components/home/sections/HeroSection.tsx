@@ -2,19 +2,19 @@ import React from 'react';
 import { ArrowRight, ShieldCheck, Truck, RefreshCw, Star, Sparkles } from 'lucide-react';
 import { useShop } from '../../../context/ShopContext';
 import { useCustomizer } from '../../../context/CustomizerContext';
+import { categoryService } from '../../../services';
 
 export const HeroSection: React.FC = () => {
   const { navigateTo } = useShop();
   const { config } = useCustomizer();
   const hero = config.hero;
 
-  const quickCategories = [
-    { name: "Women's Fashion", label: 'Fashion', icon: '👗' },
-    { name: 'Gadgets', label: 'Smart Gadgets', icon: '⚡' },
-    { name: 'Beauty & Personal Care', label: 'Beauty & Care', icon: '✨' },
-    { name: "Women's Jewelry", label: 'Jewelry', icon: '💍' },
-    { name: 'Home & Living', label: 'Home & Living', icon: '🌿' }
-  ];
+  const dynamicCategories = categoryService.getCategoriesSync().slice(0, 5);
+  const quickCategories = dynamicCategories.map(cat => ({
+    name: cat.name,
+    label: cat.name.replace("Women's ", ''),
+    icon: (cat as any).icon || '✨'
+  }));
 
   return (
     <section 

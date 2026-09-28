@@ -12,7 +12,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useShop } from '../../context/ShopContext';
-import { CATEGORIES_DATA } from '../../data/categories';
+import { categoryService } from '../../services';
 import { ProductCard } from '../product/ProductCard';
 
 export const ShopView: React.FC = () => {
@@ -28,6 +28,8 @@ export const ShopView: React.FC = () => {
     setSortBy,
     navigateTo 
   } = useShop();
+
+  const categories = categoryService.getCategoriesSync();
 
   const [priceFilter, setPriceFilter] = useState<number>(5000);
   const [onlyInStock, setOnlyInStock] = useState<boolean>(false);
@@ -97,7 +99,7 @@ export const ShopView: React.FC = () => {
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Active category object
-  const activeCategoryObj = CATEGORIES_DATA.find(c => c.name === selectedCategory);
+  const activeCategoryObj = categories.find(c => c.name === selectedCategory);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -195,7 +197,7 @@ export const ShopView: React.FC = () => {
                 <span className="text-neutral-400">{products.length}</span>
               </button>
 
-              {CATEGORIES_DATA.map(cat => (
+              {categories.map(cat => (
                 <div key={cat.id}>
                   <button
                     onClick={() => {
@@ -448,7 +450,7 @@ export const ShopView: React.FC = () => {
                   >
                     All Categories
                   </button>
-                  {CATEGORIES_DATA.map(c => (
+                  {categories.map(c => (
                     <button
                       key={c.id}
                       onClick={() => { setSelectedCategory(c.name); setSelectedSubcategory(null); }}
