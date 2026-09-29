@@ -1,106 +1,85 @@
-import { Category, Brand, ProductAttribute } from '../../types';
-import { API_CONFIG } from '../api/config';
-import { ICategoryAdapter } from './adapters/ICategoryAdapter';
-import { CategoryMockAdapter } from './adapters/CategoryMockAdapter';
-import { CategoryApiAdapter } from './adapters/CategoryApiAdapter';
+import { apiClient } from '../api/apiClient';
+import { Category } from '../../types';
 
-export interface ICategoryService {
-  getCategories(): Promise<Category[]>;
-  getCategoriesSync(): Category[];
-  getCategoryById(id: string): Promise<Category | null>;
-  createCategory(category: Omit<Category, 'id'>): Promise<Category>;
-  updateCategory(idOrCategory: string | Category, updates?: Partial<Category>): Promise<Category>;
-  deleteCategory(id: string): Promise<boolean>;
+class CategoryService {
+  private categories: Category[] = [];
 
-  getBrands(): Promise<Brand[]>;
-  getBrandsSync(): Brand[];
-  getBrandById(id: string): Promise<Brand | null>;
-  createBrand(brand: Omit<Brand, 'id'>): Promise<Brand>;
-  updateBrand(idOrBrand: string | Brand, updates?: Partial<Brand>): Promise<Brand>;
-  deleteBrand(id: string): Promise<boolean>;
-
-  getTags(): Promise<string[]>;
-  getAttributes(): Promise<ProductAttribute[]>;
-  getAdapterType(): 'mock' | 'api';
-}
-
-class CategoryServiceImpl implements ICategoryService {
-  private mockAdapter: CategoryMockAdapter;
-  private apiAdapter: CategoryApiAdapter | null = null;
-
-  constructor() {
-    this.mockAdapter = new CategoryMockAdapter();
-  }
-
-  private getAdapter(): ICategoryAdapter {
-    if (API_CONFIG.isMockMode) {
-      return this.mockAdapter;
+  // Get all categories from backend
+  async getCategories(): Promise<Category[]> {
+    try {
+      const response = await apiClient.get<{items: Category[]}>('/api/products/categories/all');
+      if (response.isSuccess && response.data?.items) {
+        this.categories = response.data.items.map(cat => {
+          // Parse extra metadata saved in description column
+          try {
+            if (cat.description && cat.description.startsWith('{')) {
+              const meta = JSON.parse(cat.description);
+              cat.banglaName = meta.banglaName || '';
+              cat.subcategories = typeof meta.subcategories === 'string' 
+                ? JSON.parse(meta.subcategories) 
+                : meta.subcategories;
+            }
+          } catch (e) {}
+          return cat;
+        });
+        return this.categories;
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      return [];
     }
-    if (!this.apiAdapter) {
-      this.apiAdapter = new CategoryApiAdapter();
+  }
+
+  getCategoriesSync(): Category[] {
+    return this.categories;
+  }
+
+  // Create category via FormData (supports Image Upload)
+  async createCategory(data: FormData | any): Promise<boolean> {
+    try {
+      const response = await apiClient.post('/api/products/categories', data);
+      if (response.isSuccess) {
+        await this.getCategories(); // Refresh list after create
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to create category:', error);
+      return false;
     }
-    return this.apiAdapter;
   }
 
-  public getAdapterType(): 'mock' | 'api' {
-    return API_CONFIG.isMockMode ? 'mock' : 'api';
+  // Update category via FormData
+  async updateCategory(data: FormData | any): Promise<boolean> {
+    try {
+      const id = data instanceof FormData ? data.get('id') : data.id;
+      const response = await apiClient.put(`/api/products/categories/${id}`, data);
+      if (response.isSuccess) {
+        await this.getCategories(); // Refresh list
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to update category:', error);
+      return false;
+    }
   }
 
-  public getCategoriesSync(): Category[] {
-    return this.getAdapter().getCategoriesSync();
-  }
-
-  public async getCategories(): Promise<Category[]> {
-    return this.getAdapter().getCategories();
-  }
-
-  public async getCategoryById(id: string): Promise<Category | null> {
-    return this.getAdapter().getCategoryById(id);
-  }
-
-  public async createCategory(category: Omit<Category, 'id'>): Promise<Category> {
-    return this.getAdapter().createCategory(category);
-  }
-
-  public async updateCategory(idOrCategory: string | Category, updates?: Partial<Category>): Promise<Category> {
-    return this.getAdapter().updateCategory(idOrCategory, updates);
-  }
-
-  public async deleteCategory(id: string): Promise<boolean> {
-    return this.getAdapter().deleteCategory(id);
-  }
-
-  public getBrandsSync(): Brand[] {
-    return this.getAdapter().getBrandsSync();
-  }
-
-  public async getBrands(): Promise<Brand[]> {
-    return this.getAdapter().getBrands();
-  }
-
-  public async getBrandById(id: string): Promise<Brand | null> {
-    return this.getAdapter().getBrandById(id);
-  }
-
-  public async createBrand(brand: Omit<Brand, 'id'>): Promise<Brand> {
-    return this.getAdapter().createBrand(brand);
-  }
-
-  public async updateBrand(idOrBrand: string | Brand, updates?: Partial<Brand>): Promise<Brand> {
-    return this.getAdapter().updateBrand(idOrBrand, updates);
-  }
-
-  public async deleteBrand(id: string): Promise<boolean> {
-    return this.getAdapter().deleteBrand(id);
-  }
-
-  public async getTags(): Promise<string[]> {
-    return this.getAdapter().getTags();
-  }
-
-  public async getAttributes(): Promise<ProductAttribute[]> {
-    return this.getAdapter().getAttributes();
+  // Delete category
+  async deleteCategory(id: string): Promise<boolean> {
+    try {
+      const response = await apiClient.delete(`/api/products/categories/${id}`);
+      if (response.isSuccess) {
+        await this.getCategories();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to delete category:', error);
+      return false;
+    }
   }
 }
 
-export const categoryService: ICategoryService = new CategoryServiceImpl();
+export const categoryService = new CategoryService();
